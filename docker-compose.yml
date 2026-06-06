@@ -1,0 +1,42 @@
+version: "3.8"
+services:
+  mongo:
+    image: mongo:6
+    container_name: ecommerce-mongo
+    ports: ["27017:27017"]
+    volumes: ["mongo-data:/data/db"]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: ecommerce-mongo-express
+    ports: ["8081:8081"]
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: password
+      ME_CONFIG_MONGODB_URL: mongodb://admin:password@mongo:27017/
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+    depends_on: [mongo]
+
+  backend:
+    build: ./backend
+    container_name: ecommerce-backend
+    ports: ["8000:8000"]
+    environment:
+      MONGO_URI: mongodb://admin:password@mongo:27017/
+      DB_NAME: ecommerce
+    depends_on: [mongo]
+
+  frontend:
+    build: ./frontend
+    container_name: ecommerce-frontend
+    ports: ["80:80"]
+    environment:
+      VITE_API_URL: http://localhost:8000
+    depends_on: [backend]
+
+volumes:
+  mongo-data:
