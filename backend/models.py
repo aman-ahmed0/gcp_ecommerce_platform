@@ -7,11 +7,13 @@ class Product(db.Model):
     name = db.Column(db.String(100), nullable=False)
     price = db.Column(db.Float, nullable=False)
     image = db.Column(db.String(255))
+    description = db.Column(db.Text)
 
     def to_dict(self):
         return {
             'id': self.id,
             'name': self.name,
             'price': self.price,
-            'image': self.image
+            'image': self.image,
+            'description': self.description
         }

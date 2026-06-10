@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:15
+    container_name: homeoffice-db
+    environment:
+      POSTGRES_USER: homeoffice
+      POSTGRES_PASSWORD: homeoffice123
+      POSTGRES_DB: homeoffice_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    container_name: homeoffice-backend
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    environment:
+      FLASK_ENV: development
+
+  frontend:
+    build: ./frontend
+    container_name: homeoffice-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:

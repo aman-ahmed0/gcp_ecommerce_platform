@@ -17,7 +17,10 @@
 }
 
 html {
-  @apply bg-gray-950 text-gray-100 font-sans antialiased;
+  background-color: #0f172a;
+  background-image: radial-gradient(circle at 1px 1px, #1e293b 1px, transparent 0);
+  background-size: 24px 24px;
+  @apply text-gray-100 font-sans antialiased;
 }
 
 ::-webkit-scrollbar {
@@ -29,4 +32,48 @@ html {
 ::-webkit-scrollbar-thumb {
   background: #4b5563;
   border-radius: 3px;
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(0, 166, 80, 0.4); }
+  50% { box-shadow: 0 0 20px rgba(0, 166, 80, 0.8); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+
+/* New gear animations */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes spin-reverse-slow {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+@keyframes spin-medium {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow { animation: spin-slow 18s linear infinite; }
+.animate-spin-reverse-slow { animation: spin-reverse-slow 22s linear infinite; }
+.animate-spin-medium { animation: spin-medium 10s linear infinite; }
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(0, 166, 80, 0.4); }
+  50% { box-shadow: 0 0 20px rgba(0, 166, 80, 0.8); }
+}
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
 }
