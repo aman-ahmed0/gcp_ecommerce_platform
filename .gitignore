@@ -9,3 +9,5 @@ node_modules/
 
 # Old frontend
 frontend_old/
+
+*.tar

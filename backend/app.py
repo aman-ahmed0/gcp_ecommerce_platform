@@ -1,4 +1,6 @@
 import time
+import os
+
 from flask import Flask, jsonify, abort
 from flask_cors import CORS
 from sqlalchemy.exc import OperationalError
@@ -9,8 +11,15 @@ from urllib.parse import quote
 app = Flask(__name__)
 CORS(app)
 
-# PostgreSQL configuration (db is the service name in docker-compose)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://homeoffice:homeoffice123@db:5432/homeoffice_db'
+
+DB_USER = os.environ.get('POSTGRES_USER', 'homeoffice')
+DB_PASSWORD = os.environ.get('POSTGRES_PASSWORD', 'homeoffice123')
+DB_HOST = os.environ.get('DB_HOST', 'db')
+DB_PORT = os.environ.get('DB_PORT', '5432')
+DB_NAME = os.environ.get('POSTGRES_DB', 'homeoffice_db')
+
+app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
