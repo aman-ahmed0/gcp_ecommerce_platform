@@ -4,29 +4,29 @@ metadata:
   name: grafana-dashboards
   namespace: monitoring
 data:
-  dashboard.json: |
+  cluster-pods.json: |
     {
-      "title": "Kubernetes Pod Resources",
-      "uid": "pod-resources",
+      "title": "Cluster Pod Resources",
+      "uid": "cluster-pods",
       "panels": [
         {
-          "title": "CPU Usage per Pod",
+          "title": "CPU Usage per Pod (all namespaces)",
           "type": "graph",
           "targets": [
             {
-              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"ecommerce\"}[1m])) by (pod)",
-              "legendFormat": "{{pod}}"
+              "expr": "sum(rate(container_cpu_usage_seconds_total{container!=\"\", container!=\"POD\"}[1m])) by (namespace, pod)",
+              "legendFormat": "{{namespace}}/{{pod}}"
             }
           ],
           "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
         },
         {
-          "title": "Memory Usage per Pod",
+          "title": "Memory Usage per Pod (all namespaces)",
           "type": "graph",
           "targets": [
             {
-              "expr": "sum(container_memory_usage_bytes{namespace=\"ecommerce\"}) by (pod)",
-              "legendFormat": "{{pod}}"
+              "expr": "sum(container_memory_usage_bytes{container!=\"\", container!=\"POD\"}) by (namespace, pod)",
+              "legendFormat": "{{namespace}}/{{pod}}"
             }
           ],
           "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
