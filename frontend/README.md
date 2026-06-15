@@ -1,36 +1,240 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Frontend – HomeOffice Hub
 
-## Getting Started
+Modern dark-themed e-commerce storefront built with **Next.js 16** and **Tailwind CSS**.
 
-First, run the development server:
+---
+
+## Features
+
+* Product listing with dynamic data fetched from the backend API
+* Product detail page with:
+
+  * Quantity selector
+  * Image zoom
+  * Back-to-shop navigation
+* Slide-out shopping cart
+
+  * React Context state management
+  * `localStorage` persistence
+* About page with rotating gear animation (pure CSS)
+* Contact page featuring team member cards with GitHub avatars
+* Premium dark theme with subtle dot-grid background
+
+---
+
+## Tech Stack
+
+### Framework
+
+* Next.js 16
+* React
+
+### Styling
+
+* Tailwind CSS
+* Custom emerald-green accent palette
+
+### State Management
+
+* React Context API
+
+### Development Tools
+
+* Turbopack
+
+---
+
+## How to Run (Standalone)
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The application will be available at:
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+```text
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+API requests to `/api/*` are automatically proxied to the backend through the Next.js rewrite configuration.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```text
+frontend/
+├── src/
+│   ├── app/
+│   │   ├── layout.js              # Root layout (providers, header, cart)
+│   │   ├── page.js                # Home page (hero + product grid)
+│   │   ├── about/page.js          # About page
+│   │   ├── contact/page.js        # Contact page
+│   │   ├── product/[id]/page.js   # Product detail page
+│   │   ├── globals.css            # Global styles
+│   │   └── context/
+│   │       └── CartContext.js     # Cart state management
+│   │
+│   └── components/
+│       ├── Header.js              # Navigation and cart toggle
+│       ├── CartDrawer.js          # Slide-out shopping cart
+│       └── ProductCard.js         # Product card component
+│
+├── public/                        # Static assets
+├── next.config.mjs                # Next.js configuration + API proxy
+├── tailwind.config.mjs            # Tailwind theme customization
+└── package.json
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Styling
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Dark Mode
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Dark mode is enforced globally using:
+
+```html
+<html class="dark">
+```
+
+### Theme
+
+The application uses a custom emerald-green accent palette defined in:
+
+```text
+tailwind.config.mjs
+```
+
+Example color classes:
+
+```text
+accent-400
+accent-500
+accent-600
+```
+
+### Background
+
+A subtle dot-grid background is applied globally through:
+
+```text
+src/app/globals.css
+```
+
+---
+
+## API Integration
+
+The frontend uses Next.js Rewrites to forward API requests to the backend service.
+
+### Rewrite Configuration
+
+```javascript
+// next.config.mjs
+
+async rewrites() {
+  return [
+    {
+      source: '/api/:path*',
+      destination: 'http://backend:5000/api/:path*',
+    },
+  ];
+}
+```
+
+### Benefits
+
+* No hardcoded backend URLs in components
+* Works seamlessly with Docker Compose
+* Portable to Kubernetes deployments
+* Simplifies local development
+
+All API calls use relative paths such as:
+
+```javascript
+fetch('/api/products')
+```
+
+---
+
+## Environment Variables
+
+| Variable              | Default  | Description                                |
+| --------------------- | -------- | ------------------------------------------ |
+| `NEXT_PUBLIC_API_URL` | Not used | Optional override for backend API endpoint |
+
+---
+
+## Docker
+
+Current Docker image runs the Next.js development server directly.
+
+### Dockerfile
+
+```dockerfile
+FROM node:20-slim
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev", "--", "-H", "0.0.0.0"]
+```
+
+### Production Recommendation
+
+For production deployments:
+
+```bash
+npm run build
+npm run start
+```
+
+A future enhancement would be converting the Dockerfile to a multi-stage production build for smaller image sizes and improved security.
+
+---
+
+## Testing
+
+Testing infrastructure has not yet been implemented.
+
+Potential future additions:
+
+* Jest
+* React Testing Library
+* Playwright
+* Cypress
+
+---
+
+## Future Enhancements
+
+* Product search and filtering
+* User authentication
+* Checkout workflow
+* Wishlist functionality
+* Responsive image optimization
+* Server-side caching
+* Production-ready multi-stage Docker build
+
+---
+
+## Related Documentation
+
+* Root Project Documentation: `../README.md`
+* Backend Documentation: `../backend/README.md`
+* Kubernetes Documentation: `../kubernetes/README.md`
