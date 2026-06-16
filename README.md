@@ -8,7 +8,7 @@ An end-to-end, production-ready e-commerce platform for work-from-home electroni
 
 ```text
 ┌─────────────┐     ┌──────────────┐     ┌────────────┐
-│   Next.js   │────▶│  Flask API   │────▶│ PostgreSQL │
+│   Next.js   │───▶│  Flask API   │────▶│ PostgreSQL │
 │  Frontend   │     │   (Python)   │     │  Database  │
 └─────────────┘     └──────────────┘     └────────────┘
         │                    │
