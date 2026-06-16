@@ -12,7 +12,7 @@ Modern dark-themed e-commerce storefront built with **Next.js 16** and **Tailwin
   * Quantity selector
   * Image zoom
   * Back-to-shop navigation
-* Slide-out shopping cart
+* Slide-out shopping cart:
 
   * React Context state management
   * `localStorage` persistence
@@ -66,8 +66,6 @@ http://localhost:3000
 
 API requests to `/api/*` are automatically proxied to the backend through the Next.js rewrite configuration.
 
----
-
 ## Project Structure
 
 ```text
@@ -94,8 +92,6 @@ frontend/
 └── package.json
 ```
 
----
-
 ## Styling
 
 ### Dark Mode
@@ -108,11 +104,7 @@ Dark mode is enforced globally using:
 
 ### Theme
 
-The application uses a custom emerald-green accent palette defined in:
-
-```text
-tailwind.config.mjs
-```
+The application uses a custom emerald-green accent palette defined in `tailwind.config.mjs`.
 
 Example color classes:
 
@@ -124,13 +116,7 @@ accent-600
 
 ### Background
 
-A subtle dot-grid background is applied globally through:
-
-```text
-src/app/globals.css
-```
-
----
+A subtle dot-grid background is applied globally through `src/app/globals.css`.
 
 ## API Integration
 
@@ -164,21 +150,15 @@ All API calls use relative paths such as:
 fetch('/api/products')
 ```
 
----
-
 ## Environment Variables
 
-| Variable              | Default  | Description                                |
-| --------------------- | -------- | ------------------------------------------ |
-| `NEXT_PUBLIC_API_URL` | Not used | Optional override for backend API endpoint |
-
----
+| Variable            | Default  | Description                                |
+| ------------------- | -------- | ------------------------------------------ |
+| NEXT_PUBLIC_API_URL | Not used | Optional override for backend API endpoint |
 
 ## Docker
 
-Current Docker image runs the Next.js development server directly.
-
-### Dockerfile
+The current Dockerfile runs the Next.js development server directly.
 
 ```dockerfile
 FROM node:20-slim
@@ -195,43 +175,16 @@ EXPOSE 3000
 CMD ["npm", "run", "dev", "--", "-H", "0.0.0.0"]
 ```
 
-### Production Recommendation
-
-For production deployments:
+For a production deployment, you would build the app first and then serve the static output:
 
 ```bash
 npm run build
 npm run start
 ```
 
-A future enhancement would be converting the Dockerfile to a multi-stage production build for smaller image sizes and improved security.
-
----
-
 ## Testing
 
 Testing infrastructure has not yet been implemented.
-
-Potential future additions:
-
-* Jest
-* React Testing Library
-* Playwright
-* Cypress
-
----
-
-## Future Enhancements
-
-* Product search and filtering
-* User authentication
-* Checkout workflow
-* Wishlist functionality
-* Responsive image optimization
-* Server-side caching
-* Production-ready multi-stage Docker build
-
----
 
 ## Related Documentation
 

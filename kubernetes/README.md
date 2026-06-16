@@ -49,7 +49,8 @@ kubernetes/
 │       └── service.yaml
 │
 └── argocd/
-    └── (empty – ArgoCD manifests not yet added)
+    ├── application.yaml
+    └── README.md
 ```
 
 ---
@@ -162,9 +163,9 @@ ahmedaman0/homeoffice-backend:latest
 
 A ConfigMap provides:
 
-* `DB_HOST`
-* `DB_PORT`
-* `FLASK_ENV`
+* DB_HOST
+* DB_PORT
+* FLASK_ENV
 
 Database credentials are supplied through Kubernetes Secrets.
 
@@ -172,11 +173,11 @@ Database credentials are supplied through Kubernetes Secrets.
 
 When the container starts:
 
-1. Waits for PostgreSQL to become available
-2. Establishes database connectivity
-3. Creates required tables (if needed)
-4. Seeds the products table when empty
-5. Starts the Flask application
+* Waits for PostgreSQL to become available
+* Establishes database connectivity
+* Creates required tables (if needed)
+* Seeds the products table when empty
+* Starts the Flask application
 
 ---
 
@@ -222,28 +223,26 @@ allowing seamless communication inside the cluster.
 
 ---
 
-## Monitoring
+### Monitoring
 
-The monitoring stack consists of Prometheus and Grafana running in the dedicated `monitoring` namespace.
+The monitoring stack consists of Prometheus and Grafana running in the dedicated monitoring namespace.
 
----
+#### Prometheus
 
-### Prometheus
-
-#### Container Image
+##### Container Image
 
 ```text
 prom/prometheus:latest
 ```
 
-#### Features
+##### Features
 
 * Kubernetes node discovery
 * cAdvisor metrics collection
 * Container resource monitoring
 * Pod resource monitoring
 
-#### Configuration
+##### Configuration
 
 The Prometheus ConfigMap contains scrape configurations targeting:
 
@@ -253,7 +252,7 @@ Kubelet → cAdvisor → Port 10250
 
 on all cluster nodes.
 
-#### RBAC
+##### RBAC
 
 Prometheus is granted cluster-wide read access through:
 
@@ -263,17 +262,15 @@ Prometheus is granted cluster-wide read access through:
 
 allowing automatic node discovery and metric collection.
 
----
+#### Grafana
 
-### Grafana
-
-#### Container Image
+##### Container Image
 
 ```text
 grafana/grafana:latest
 ```
 
-#### Service Type
+##### Service Type
 
 ```text
 ClusterIP
@@ -285,9 +282,9 @@ exposed internally on port:
 3000
 ```
 
-#### Provisioned Resources
+##### Provisioned Resources
 
-##### Dashboard
+###### Dashboard
 
 ```text
 cluster-pods.json
@@ -300,7 +297,7 @@ Provides:
 * Namespace-level visibility
 * Cluster-wide resource monitoring
 
-##### Data Source
+###### Data Source
 
 ```text
 datasources.yaml
@@ -312,7 +309,7 @@ Automatically configures Prometheus:
 http://prometheus.monitoring.svc.cluster.local:9090
 ```
 
-##### Dashboard Provisioning
+###### Dashboard Provisioning
 
 ```text
 dashboards.yaml
@@ -323,6 +320,12 @@ Automatically loads dashboards from:
 ```text
 /var/lib/grafana/dashboards
 ```
+
+---
+
+## GitOps with ArgoCD
+
+ArgoCD is configured via the `application.yaml` manifest in the `argocd/` folder. It continuously syncs the `kubernetes/` directory from the `develop` branch to the cluster, enabling automated deployments and drift detection.
 
 ---
 
@@ -339,9 +342,9 @@ ahmedaman0/homeoffice-frontend
 
 To use another registry:
 
-1. Push images to the new registry
-2. Update the `image:` fields in the deployment manifests
-3. Configure image pull secrets if required
+* Push images to the new registry
+* Update the `image:` fields in the deployment manifests
+* Configure image pull secrets if required
 
 ---
 
@@ -370,18 +373,6 @@ Use a cloud-backed storage class such as:
 * Azure Managed Disks (AKS)
 
 to ensure durable storage across node failures and cluster upgrades.
-
----
-
-## Future Enhancements
-
-* ArgoCD GitOps deployment manifests
-* Helm chart packaging
-* Horizontal Pod Autoscaler (HPA)
-* Ingress Controller and TLS
-* External Secrets integration
-* Automated backups for PostgreSQL
-* Production-grade observability stack
 
 ---
 

@@ -50,7 +50,7 @@ Before using Terraform, ensure you have:
 
 * Terraform >= 1.5
 * Google Cloud SDK (`gcloud`)
-* kubectl
+* `kubectl`
 
 ---
 
@@ -65,8 +65,6 @@ gcloud auth application-default login
 A browser window will open requesting authentication and authorization.
 
 After successful login, Terraform can use your Google Cloud credentials.
-
----
 
 ### 2. Configure Variables
 
@@ -87,12 +85,10 @@ project_id = "your-gcp-project-id"
 Optional overrides:
 
 ```hcl
-project_id  = "your-gcp-project-id"
-region      = "us-central1"
+project_id   = "your-gcp-project-id"
+region       = "us-central1"
 cluster_name = "homeoffice-cluster"
 ```
-
----
 
 ### 3. Initialize Terraform
 
@@ -108,8 +104,6 @@ This command:
 * Initializes modules
 * Prepares the working directory
 
----
-
 ### 4. Review the Execution Plan
 
 ```bash
@@ -119,8 +113,6 @@ terraform plan
 Terraform will display all resources that will be created without making changes.
 
 Review the plan carefully before proceeding.
-
----
 
 ### 5. Apply the Configuration
 
@@ -148,8 +140,6 @@ Terraform will provision:
 * Node pool
 * Artifact Registry repository
 
----
-
 ### 6. Configure kubectl
 
 After deployment completes, retrieve cluster credentials:
@@ -168,11 +158,9 @@ kubectl get nodes
 
 Your Kubernetes cluster is now ready for application deployment.
 
----
-
 ### 7. Deploy HomeOffice Hub
 
-After configuring kubectl:
+After configuring `kubectl`:
 
 ```bash
 kubectl apply -f ../kubernetes/namespace.yaml
@@ -181,8 +169,6 @@ kubectl apply -f ../kubernetes/backend/
 kubectl apply -f ../kubernetes/frontend/
 kubectl apply -f ../kubernetes/monitoring/
 ```
-
----
 
 ### 8. Destroy Infrastructure
 
@@ -308,27 +294,7 @@ terraform.tfstate
 
 This is suitable for learning and individual development.
 
-### Recommended for Teams
-
-Use a Google Cloud Storage backend.
-
-Example:
-
-```hcl
-terraform {
-  backend "gcs" {
-    bucket = "homeoffice-terraform-state"
-    prefix = "terraform/state"
-  }
-}
-```
-
-Benefits:
-
-* Shared state
-* State locking
-* Version history
-* Disaster recovery
+For team use, consider configuring a Google Cloud Storage backend to enable shared state, state locking, and version history.
 
 ---
 
@@ -364,16 +330,16 @@ oauth_scopes = ["cloud-platform"]
 
 This allows workloads running inside the cluster to access Google Cloud APIs when appropriately authorized.
 
-### Recommendations
+### Production Considerations
 
-For production environments:
+When moving to production, evaluate:
 
-* Use Workload Identity
-* Enable private clusters
-* Restrict network access
-* Store secrets outside Terraform state
-* Enable Binary Authorization
-* Configure IAM using least-privilege principles
+* Workload Identity
+* Private clusters
+* Network access restrictions
+* Secrets management outside Terraform state
+* Binary Authorization
+* IAM least-privilege principles
 
 ---
 
@@ -391,19 +357,6 @@ Always destroy unused environments:
 ```bash
 terraform destroy
 ```
-
----
-
-## Future Enhancements
-
-* Remote state in GCS
-* Workload Identity
-* Private GKE cluster
-* Cloud SQL PostgreSQL
-* Managed SSL certificates
-* Ingress Controller
-* DNS automation
-* GitOps integration with ArgoCD
 
 ---
 

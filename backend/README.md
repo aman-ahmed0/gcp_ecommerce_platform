@@ -67,7 +67,7 @@ RESTful API built with **Flask**, **SQLAlchemy**, and **PostgreSQL** for the Hom
 
 ### Schema
 
-#### Table: `products`
+**Table:** `products`
 
 | Column        | Type         | Description                |
 | ------------- | ------------ | -------------------------- |
@@ -77,9 +77,7 @@ RESTful API built with **Flask**, **SQLAlchemy**, and **PostgreSQL** for the Hom
 | `image`       | String(255)  | Product image URL          |
 | `description` | Text         | Product description        |
 
----
-
-## Database Connection
+### Database Connection
 
 The application dynamically builds the PostgreSQL connection string from environment variables:
 
@@ -99,9 +97,7 @@ Used by Docker Compose and local development:
 | `DB_HOST`           | `db`            |
 | `DB_PORT`           | `5432`          |
 
----
-
-## Database Seeding
+### Database Seeding
 
 On first startup, the application checks whether the `products` table contains data.
 
@@ -119,28 +115,24 @@ No manual seed command is required.
 
 ### 1. Create a Virtual Environment
 
-Linux/macOS:
+**Linux/macOS**
 
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
 
-Windows:
+**Windows**
 
 ```powershell
 venv\Scripts\activate
 ```
-
----
 
 ### 2. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
-
----
 
 ### 3. Start PostgreSQL
 
@@ -155,8 +147,6 @@ docker run \
   -p 5432:5432 \
   -d postgres:15
 ```
-
----
 
 ### 4. Run the API
 
@@ -254,7 +244,7 @@ Start Flask API
 
 ## Health Check
 
-A simple endpoint is available for connectivity verification:
+The health check endpoint returns a simple confirmation message:
 
 ```http
 GET /
@@ -262,24 +252,9 @@ GET /
 
 Example response:
 
-```json
-{
-  "status": "ok"
-}
+```text
+HomeOffice Hub API is running!
 ```
-
----
-
-## Future Enhancements
-
-* User authentication
-* Product search and filtering
-* Category support
-* Pagination
-* Swagger/OpenAPI documentation
-* Unit and integration testing
-* Database migrations with Alembic
-* JWT-based authorization
 
 ---
 

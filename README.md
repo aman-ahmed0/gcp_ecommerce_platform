@@ -17,11 +17,9 @@ An end-to-end, production-ready e-commerce platform for work-from-home electroni
 │                Docker / Kubernetes                  │
 │                                                     │
 │  Local Development: Docker Compose                  │
-│  Production: GKE with GitOps via ArgoCD            │
+│  Production: GKE with GitOps via ArgoCD             │
 └─────────────────────────────────────────────────────┘
 ```
-
----
 
 ## Tech Stack
 
@@ -47,8 +45,9 @@ An end-to-end, production-ready e-commerce platform for work-from-home electroni
 * Docker
 * Docker Compose
 * Kubernetes
-* Google Kubernetes Engine (GKE)
+* Google Kubernetes Engine (GKE) (Terraform module ready)
 * Terraform
+* ArgoCD
 
 ### Monitoring
 
@@ -57,10 +56,8 @@ An end-to-end, production-ready e-commerce platform for work-from-home electroni
 
 ### CI/CD
 
-* GitHub Actions *(planned)*
-* ArgoCD *(planned)*
-
----
+* GitHub Actions (planned)
+* ArgoCD
 
 ## Getting Started
 
@@ -73,9 +70,7 @@ Install the following tools before running the project:
 * Python 3.11+
 * Node.js 20+
 
----
-
-## Run with Docker Compose (Development)
+### Run with Docker Compose (Development)
 
 Start the entire stack locally:
 
@@ -89,9 +84,7 @@ Application URL:
 http://localhost:3000
 ```
 
----
-
-## Run on Kubernetes
+### Run on Kubernetes
 
 Deploy all components:
 
@@ -115,9 +108,7 @@ Open:
 http://localhost:8080
 ```
 
----
-
-## Access Grafana Dashboards
+### Access Grafana Dashboards
 
 ```bash
 kubectl port-forward -n monitoring svc/grafana 3001:3000
@@ -136,52 +127,46 @@ Username: admin
 Password: admin
 ```
 
----
-
 ## Branching Strategy
 
 This project follows a simplified Git Flow workflow.
 
 ### Branches
 
-| Branch      | Purpose               |
-| ----------- | --------------------- |
-| `main`      | Production-ready code |
-| `develop`   | Integration branch    |
-| `feature/*` | Feature development   |
+| Branch    | Purpose               |
+| --------- | --------------------- |
+| main      | Production-ready code |
+| develop   | Integration branch    |
+| feature/* | Feature development   |
 
 ### Workflow
 
-1. Create a feature branch from `develop`
+1. Create a feature branch from develop
 2. Implement changes
-3. Open a Pull Request into `develop`
+3. Open a Pull Request into develop
 4. Validate functionality and testing
-5. Merge `develop` into `main` for releases
+5. Merge develop into main for releases
 
 Example:
 
 ```text
 develop
- ├── feature/kubernetes
  ├── feature/terraform-gke
+ ├── feature/argocd
  └── feature/monitoring
 ```
 
----
-
 ## Repository Structure
 
-| Directory/File       | Description                               |
-| -------------------- | ----------------------------------------- |
-| `frontend/`          | Next.js application                       |
-| `backend/`           | Flask REST API                            |
-| `kubernetes/`        | Kubernetes manifests                      |
-| `infrastructure/`    | Terraform modules for GCP *(coming soon)* |
-| `scripts/`           | Deployment and utility scripts            |
-| `docs/`              | Architecture diagrams and screenshots     |
-| `docker-compose.yml` | Local full-stack deployment               |
-
----
+| Directory/File     | Description                                              |
+| ------------------ | -------------------------------------------------------- |
+| frontend/          | Next.js application                                      |
+| backend/           | Flask REST API                                           |
+| kubernetes/        | Kubernetes manifests (deployments, services, monitoring) |
+| infrastructure/    | Terraform modules for GCP (VPC, GKE, Artifact Registry)  |
+| scripts/           | Deployment and utility scripts                           |
+| docs/              | Architecture diagrams and screenshots                    |
+| docker-compose.yml | Local full-stack deployment                              |
 
 ## Monitoring
 
@@ -196,38 +181,31 @@ Prometheus collects:
 
 ### Grafana
 
-Pre-configured dashboards include:
-
-* Cluster Pod Resources
-* CPU utilization per pod
-* Memory utilization per pod
-* Namespace resource consumption
-
----
+Grafana is pre-configured via ConfigMaps and automatically loads a Cluster Pod Resources dashboard showing real-time CPU and memory usage per pod across all namespaces.
 
 ## Contributing
 
-1. Create a feature branch from `develop`
+Create a feature branch from develop:
 
 ```bash
 git checkout develop
 git checkout -b feature/my-feature
 ```
 
-2. Commit your changes
+Commit your changes:
 
 ```bash
 git add .
 git commit -m "Add new feature"
 ```
 
-3. Push your branch
+Push your branch:
 
 ```bash
 git push origin feature/my-feature
 ```
 
-4. Open a Pull Request targeting `develop`
+Open a Pull Request targeting develop.
 
 ### Contribution Guidelines
 
@@ -236,21 +214,8 @@ git push origin feature/my-feature
 * Document significant infrastructure changes
 * Request review from at least one team member
 
----
-
-## Future Enhancements
-
-* GitHub Actions CI pipeline
-* ArgoCD GitOps deployment workflow
-* Helm chart packaging
-* Automated integration testing
-* Cloud-native secrets management
-* Horizontal Pod Autoscaling (HPA)
-
----
-
 ## License
 
 This project is provided as part of a portfolio and learning demonstration.
 
-**All Rights Reserved.**
+All Rights Reserved.
