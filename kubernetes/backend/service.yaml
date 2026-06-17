@@ -4,8 +4,10 @@ metadata:
   name: backend
   namespace: ecommerce
 spec:
+  type: NodePort #should be changed to LoadBalancer for production
   selector:
     app: backend
   ports:
     - port: 5000
       targetPort: 5000
+      nodePort: 30050 #should be excluded for LoadBalancer type
