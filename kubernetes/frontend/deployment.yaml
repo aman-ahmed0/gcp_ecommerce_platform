@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ahmedaman0/homeoffice-frontend:latest
+          image: ahmedaman0/homeoffice-frontend:v2
           imagePullPolicy: Always
           ports:
             - containerPort: 3000

@@ -1,20 +1,19 @@
 resource "google_container_cluster" "primary" {
   name     = var.cluster_name
-  location = var.region
+  location = "${var.region}-a"
 
   network    = var.network
   subnetwork = var.subnetwork
 
-  # We keep a minimal default node pool, then add a custom one below
   remove_default_node_pool = true
   initial_node_count       = 1
 }
 
 resource "google_container_node_pool" "primary_nodes" {
   name       = "${var.cluster_name}-node-pool"
-  location   = var.region
+  location   = "${var.region}-a"          # matches the cluster's zone
   cluster    = google_container_cluster.primary.name
-  node_count = 2
+  node_count = 1
 
   node_config {
     machine_type = "e2-medium"

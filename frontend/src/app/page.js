@@ -8,19 +8,25 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/products')
-      .then(res => res.json())
-      .then(data => {
-        setProducts(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Failed to fetch products:', err);
-        setLoading(false);
-      });
-  }, []);
+  console.log('DEBUG: useEffect running');                     // ← add this line
+  fetch('/api/products')
+    .then(res => {
+      console.log('DEBUG: fetch response status', res.status);  // ← add this line
+      return res.json();
+    })
+    .then(data => {
+      console.log('DEBUG: products data', data);                // ← add this line
+      setProducts(data);
+      setLoading(false);
+    })
+    .catch(err => {
+      console.error('Failed to fetch products:', err);
+      setLoading(false);
+    });
+}, []);
 
   return (
+    console.log('DEBUG render: loading =', loading, 'products length =', products.length),
     <div>
       <section className="bg-gradient-to-b from-gray-900 to-gray-950 py-20 text-center">
         <div className="max-w-4xl mx-auto px-4">
