@@ -9,8 +9,6 @@ on:
       - 'frontend/**'
       - 'kubernetes/backend/**'
       - 'kubernetes/frontend/**'
-      - 'VERSION'
-      - '.github/workflows/application.yml'
 
   pull_request:
     branches: [ main ]
