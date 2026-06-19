@@ -11,3 +11,4 @@ node_modules/
 frontend_old/
 
 *.tar
+google-cloud-cli-linux-x86_64.tar*

@@ -32,10 +32,6 @@ resource "google_storage_bucket" "terraform_state" {
     enabled = true
   }
 
-  encryption {
-    default_kms_key_name = null
-  }
-
   lifecycle_rule {
     condition {
       age        = 30
