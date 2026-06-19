@@ -3,11 +3,13 @@ kind: Service
 metadata:
   name: frontend
   namespace: ecommerce
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
 spec:
-  type: NodePort   #should be changed to LoadBalancer for production
+  type: ClusterIP   #should be changed to LoadBalancer for production ( or use ingress and keep it clusterip)
   selector:
     app: frontend
   ports:
     - port: 80
       targetPort: 3000
-      nodePort: 30080   #should be excluded for LoadBalancer type
+     # nodePort: 30080   #should be excluded for LoadBalancer type

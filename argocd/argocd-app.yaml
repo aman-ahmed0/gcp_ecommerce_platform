@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: homeoffice-ecommerce
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/aman-ahmed0/gcp_ecommerce_platform.git
+    targetRevision: develop
+    path: kubernetes
+    directory:
+      recurse: true
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ecommerce
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
