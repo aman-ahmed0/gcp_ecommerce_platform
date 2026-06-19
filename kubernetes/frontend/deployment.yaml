@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: flokiboats/gcp-ecommerce-platform:frontend-1.0.13
+          image: flokiboats/gcp-ecommerce-platform:frontend-1.0.14
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
