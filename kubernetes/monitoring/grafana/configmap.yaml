@@ -6,30 +6,71 @@ metadata:
 data:
   cluster-pods.json: |
     {
-      "title": "Cluster Pod Resources",
+      "title": "Cluster Monitoring",
       "uid": "cluster-pods",
+      "schemaVersion": 39,
+      "version": 10,
+      "refresh": "5s",
       "panels": [
         {
-          "title": "CPU Usage per Pod (all namespaces)",
-          "type": "graph",
+          "title": "Prometheus Target Health",
+          "type": "timeseries",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
           "targets": [
             {
-              "expr": "sum(rate(container_cpu_usage_seconds_total{container!=\"\", container!=\"POD\"}[1m])) by (namespace, pod)",
-              "legendFormat": "{{namespace}}/{{pod}}"
+              "expr": "up",
+              "legendFormat": "{{job}} - {{instance}}"
             }
           ],
-          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          }
         },
         {
-          "title": "Memory Usage per Pod (all namespaces)",
-          "type": "graph",
+          "title": "CPU Usage Raw",
+          "type": "timeseries",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
           "targets": [
             {
-              "expr": "sum(container_memory_usage_bytes{container!=\"\", container!=\"POD\"}) by (namespace, pod)",
-              "legendFormat": "{{namespace}}/{{pod}}"
+              "expr": "container_cpu_usage_seconds_total",
+              "legendFormat": "{{id}}"
             }
           ],
-          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 8
+          }
+        },
+        {
+          "title": "Memory Usage Raw",
+          "type": "timeseries",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "targets": [
+            {
+              "expr": "container_memory_usage_bytes",
+              "legendFormat": "{{id}}"
+            }
+          ],
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 8
+          }
         }
       ]
     }
