@@ -1,28 +1,9 @@
-project_id = "your-gcp-project-id"
-region     = "us-central1"
+project_id = "REPLACE_WITH_QWIKLABS_PROJECT_ID"
+region     = "europe-west3"
 
-cluster_name       = "homeoffice-cluster"
-artifact_repo_name = "homeoffice-repo"
+cluster_name      = "homeoffice-cluster"
+node_count        = 1
+node_machine_type = "e2-medium"
+node_disk_size_gb = 30
 
-# Security: use your current public IP as x.x.x.x/32.
-# Find it with: curl ifconfig.me
-master_authorized_cidr_blocks = [
-  {
-    cidr_block   = "YOUR_PUBLIC_IP/32"
-    display_name = "admin-workstation"
-  }
-]
-
-# false = private nodes with public control plane restricted by authorized networks.
-# true = private control plane only; GitHub-hosted runners cannot deploy directly.
-enable_private_endpoint = false
-
-# GitHub Workload Identity Federation. Example: owner=AhmeFawzy, repo=gcp-ecommerce-platform
-github_owner = "your-github-owner"
-github_repo  = "your-repo-name"
-
-# Optional email notification channel for Cloud Monitoring.
 alert_email = "ahmad.fawzzi@gmail.com"
-
-# Keep false unless you want managed PostgreSQL instead of Kubernetes PostgreSQL.
-enable_cloud_sql = false

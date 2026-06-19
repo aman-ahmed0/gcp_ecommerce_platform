@@ -1,161 +1,52 @@
-# HomeOffice Hub GCP Infrastructure
+# Simplified Qwiklabs GKE Terraform
 
-Terraform infrastructure for deploying the ecommerce platform to Google Cloud.
+This Terraform replaces the previous multi-module lab infrastructure with a smaller setup designed for a one-hour Qwiklabs session.
 
-## What this creates
+It creates:
 
-- Required Google APIs
-- Secure custom VPC and subnet
-- Secondary IP ranges for GKE pods and services
-- Cloud Router + Cloud NAT for private GKE nodes
-- Artifact Registry Docker repository
-- Dedicated GKE node service account
-- GitHub Actions deploy service account
-- Optional GitHub Workload Identity Federation, no JSON key required
-- Regional GKE cluster with private nodes, Shielded Nodes, Workload Identity, auto-repair, and auto-upgrade
-- Optional Cloud Monitoring email alert channel and node CPU alert
-- Optional private Cloud SQL PostgreSQL module, disabled by default
+- Required APIs
+- One VPC
+- One subnet in `europe-west3`
+- One public GKE cluster in `europe-west3`
+- One default node pool with 1 node by default, max recommended 2
+- Google Cloud Monitoring email channel and CPU alert policy
 
-## Recommended flow
+It intentionally does **not** create:
 
-### 1. Bootstrap remote state
+- Custom service accounts
+- Project IAM grants
+- GitHub Workload Identity
+- Cloud SQL
+- Cloud NAT / private GKE nodes
+- Artifact Registry
+- Remote Terraform state bucket
 
-```bash
-cd infrastructure/bootstrap-state
-cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars with your project and a globally unique bucket name
+Those items were removed because the Qwiklabs environment blocks some IAM policy updates and some regional locations, and the lab only lasts one hour.
+
+## Manual usage
+
+```powershell
+cd C:\Users\ahmed\gcp-ecommerce-platform\infrastructure
+
+@'
+project_id = "YOUR_NEW_PROJECT_ID"
+region     = "europe-west3"
+
+cluster_name      = "homeoffice-cluster"
+node_count        = 1
+node_machine_type = "e2-medium"
+node_disk_size_gb = 30
+
+alert_email = "ahmad.fawzzi@gmail.com"
+'@ | Set-Content terraform.tfvars
+
 terraform init
-terraform apply
+terraform apply -auto-approve
 ```
 
-Copy the `backend_block` output into:
+Then connect kubectl:
 
-```text
-infrastructure/backend.tf
-```
-
-Or copy `backend.tf.example` to `backend.tf` and replace the bucket name.
-
-### 2. Configure main variables
-
-```bash
-cd ..
-cp terraform.tfvars.example terraform.tfvars
-```
-
-Edit:
-
-```hcl
-project_id = "your-gcp-project-id"
-region     = "us-central1"
-
-master_authorized_cidr_blocks = [
-  {
-    cidr_block   = "YOUR_PUBLIC_IP/32"
-    display_name = "admin-workstation"
-  }
-]
-
-github_owner = "your-github-owner"
-github_repo  = "your-repo-name"
-alert_email  = "ahmad.fawzzi@gmail.com"
-```
-
-Find your public IP:
-
-```bash
-curl ifconfig.me
-```
-
-### 3. Deploy infrastructure
-
-```bash
-terraform init
-terraform fmt -recursive
-terraform validate
-terraform plan
-terraform apply
-```
-
-### 4. Configure kubectl
-
-```bash
-gcloud container clusters get-credentials $(terraform output -raw cluster_name) \
-  --region $(terraform output -raw cluster_location) \
-  --project $(terraform output -raw project_id)
-
+```powershell
+gcloud container clusters get-credentials homeoffice-cluster --region europe-west3 --project YOUR_NEW_PROJECT_ID
 kubectl get nodes
 ```
-
-### 5. Deploy Kubernetes app
-
-```bash
-kubectl apply -f ../kubernetes/namespace.yaml
-kubectl apply -f ../kubernetes/database/
-kubectl apply -f ../kubernetes/backend/
-kubectl apply -f ../kubernetes/frontend/
-```
-
-## GCP remote state vs AWS S3
-
-On AWS you used S3 and DynamoDB. On GCP use a GCS bucket:
-
-- State storage: Google Cloud Storage bucket
-- Version history: GCS bucket versioning
-- Access control: IAM + Uniform Bucket-Level Access
-- State locking: supported by the Terraform GCS backend
-
-No DynamoDB equivalent is required for Terraform locking on GCS.
-
-## GitHub Actions without JSON keys
-
-This setup creates:
-
-- `github-actions-deployer` service account
-- Workload Identity Pool
-- GitHub OIDC provider
-- IAM binding limited to one repository
-
-Use Terraform output `workload_identity_provider` in GitHub Actions.
-
-Required GitHub variables:
-
-```text
-GCP_PROJECT_ID
-GCP_REGION
-GKE_CLUSTER
-GKE_LOCATION
-ARTIFACT_REPO
-GCP_SERVICE_ACCOUNT
-GCP_WORKLOAD_IDENTITY_PROVIDER
-```
-
-## Security notes
-
-- GKE nodes are private.
-- Cloud NAT is enabled so private nodes can pull public Docker Hub images when needed.
-- Node service account is not the default Compute Engine service account.
-- GKE Workload Identity is enabled.
-- Legacy metadata endpoints are disabled on nodes.
-- Shielded VM secure boot and integrity monitoring are enabled.
-- Control-plane access should be restricted to your IP using `master_authorized_cidr_blocks`.
-- Do not commit `terraform.tfvars`, `backend.tf`, `.terraform/`, or `*.tfstate`.
-
-## Cleanup
-
-Delete app resources first:
-
-```bash
-kubectl delete -f ../kubernetes/frontend/ --ignore-not-found=true
-kubectl delete -f ../kubernetes/backend/ --ignore-not-found=true
-kubectl delete -f ../kubernetes/database/ --ignore-not-found=true
-kubectl delete -f ../kubernetes/namespace.yaml --ignore-not-found=true
-```
-
-Then destroy infra:
-
-```bash
-terraform destroy
-```
-
-The remote state bucket is created by `bootstrap-state` and is not destroyed by the main stack.

@@ -1,8 +1,0 @@
-# Copy this file to backend.tf after creating the state bucket in bootstrap-state/.
-# Backend blocks cannot use variables, so replace the bucket name manually.
-terraform {
-  backend "gcs" {
-    bucket = "REPLACE_WITH_YOUR_TERRAFORM_STATE_BUCKET"
-    prefix = "homeoffice/terraform/state"
-  }
-}

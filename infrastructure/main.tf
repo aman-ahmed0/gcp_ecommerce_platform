@@ -1,94 +1,176 @@
-module "apis" {
-  source     = "./modules/apis"
-  project_id = var.project_id
+locals {
+  required_apis = toset([
+    "compute.googleapis.com",
+    "container.googleapis.com",
+    "logging.googleapis.com",
+    "monitoring.googleapis.com"
+  ])
+
+  enable_monitoring_email = trimspace(var.alert_email) != ""
 }
 
-module "vpc" {
-  source = "./modules/vpc"
+resource "google_project_service" "required" {
+  for_each = local.required_apis
 
-  project_id    = var.project_id
-  region        = var.region
-  network_name  = var.network_name
-  subnet_name   = var.subnet_name
-  subnet_cidr   = var.subnet_cidr
-  pods_cidr     = var.pods_cidr
-  services_cidr = var.services_cidr
-  labels        = var.labels
-
-  depends_on = [module.apis]
+  project            = var.project_id
+  service            = each.key
+  disable_on_destroy = false
 }
 
-module "artifact_registry" {
-  source = "./modules/artifact-registry"
+resource "google_compute_network" "vpc" {
+  project                 = var.project_id
+  name                    = var.network_name
+  auto_create_subnetworks = false
+  routing_mode            = "REGIONAL"
 
-  project_id = var.project_id
-  region     = var.region
-  repo_name  = var.artifact_repo_name
-  labels     = var.labels
-
-  depends_on = [module.apis]
+  depends_on = [google_project_service.required]
 }
 
-module "iam" {
-  source = "./modules/iam"
+resource "google_compute_subnetwork" "subnet" {
+  project                  = var.project_id
+  name                     = var.subnet_name
+  region                   = var.region
+  network                  = google_compute_network.vpc.id
+  ip_cidr_range            = var.subnet_cidr
+  private_ip_google_access = true
 
-  project_id   = var.project_id
-  region       = var.region
-  github_owner = var.github_owner
-  github_repo  = var.github_repo
-  labels       = var.labels
+  secondary_ip_range {
+    range_name    = "homeoffice-pods"
+    ip_cidr_range = var.pods_cidr
+  }
 
-  depends_on = [module.apis]
+  secondary_ip_range {
+    range_name    = "homeoffice-services"
+    ip_cidr_range = var.services_cidr
+  }
 }
 
-module "gke" {
-  source = "./modules/gke"
+data "google_compute_default_service_account" "default" {
+  project = var.project_id
 
-  project_id                    = var.project_id
-  region                        = var.region
-  cluster_name                  = var.cluster_name
-  network_id                    = module.vpc.network_id
-  subnet_id                     = module.vpc.subnet_id
-  pods_range_name               = module.vpc.pods_range_name
-  services_range_name           = module.vpc.services_range_name
-  node_service_account_email    = module.iam.gke_node_service_account_email
-  node_machine_type             = var.node_machine_type
-  node_disk_size_gb             = var.node_disk_size_gb
-  node_min_count                = var.node_min_count
-  node_max_count                = var.node_max_count
-  master_ipv4_cidr_block        = var.master_ipv4_cidr_block
-  master_authorized_cidr_blocks = var.master_authorized_cidr_blocks
-  enable_private_endpoint       = var.enable_private_endpoint
-  labels                        = var.labels
+  depends_on = [google_project_service.required]
+}
+
+resource "google_container_cluster" "primary" {
+  project                  = var.project_id
+  name                     = var.cluster_name
+  location                 = var.region
+  network                  = google_compute_network.vpc.id
+  subnetwork               = google_compute_subnetwork.subnet.id
+  initial_node_count       = var.node_count
+  deletion_protection      = false
+  remove_default_node_pool = false
+  networking_mode          = "VPC_NATIVE"
+
+  resource_labels = var.labels
+
+  ip_allocation_policy {
+    cluster_secondary_range_name  = "homeoffice-pods"
+    services_secondary_range_name = "homeoffice-services"
+  }
+
+  release_channel {
+    channel = "REGULAR"
+  }
+
+  workload_identity_config {
+    workload_pool = "${var.project_id}.svc.id.goog"
+  }
+
+  logging_config {
+    enable_components = ["SYSTEM_COMPONENTS", "WORKLOADS"]
+  }
+
+  monitoring_config {
+    enable_components = ["SYSTEM_COMPONENTS"]
+
+    managed_prometheus {
+      enabled = true
+    }
+  }
+
+  addons_config {
+    http_load_balancing {
+      disabled = false
+    }
+
+    horizontal_pod_autoscaling {
+      disabled = false
+    }
+
+    gce_persistent_disk_csi_driver_config {
+      enabled = true
+    }
+  }
+
+  node_config {
+    machine_type    = var.node_machine_type
+    disk_size_gb    = var.node_disk_size_gb
+    service_account = data.google_compute_default_service_account.default.email
+    oauth_scopes    = ["https://www.googleapis.com/auth/cloud-platform"]
+
+    labels = var.labels
+
+    metadata = {
+      disable-legacy-endpoints = "true"
+    }
+
+    shielded_instance_config {
+      enable_secure_boot          = true
+      enable_integrity_monitoring = true
+    }
+  }
 
   depends_on = [
-    module.apis,
-    module.vpc,
-    module.iam,
-    module.artifact_registry
+    google_project_service.required,
+    google_compute_subnetwork.subnet
   ]
 }
 
-module "monitoring" {
-  source = "./modules/monitoring"
+resource "google_monitoring_notification_channel" "email" {
+  count = local.enable_monitoring_email ? 1 : 0
 
-  project_id   = var.project_id
-  cluster_name = module.gke.cluster_name
-  alert_email  = var.alert_email
+  project      = var.project_id
+  display_name = "HomeOffice email alerts"
+  type         = "email"
 
-  depends_on = [module.gke]
+  labels = {
+    email_address = var.alert_email
+  }
+
+  depends_on = [google_project_service.required]
 }
 
-module "cloud_sql_postgres" {
-  count  = var.enable_cloud_sql ? 1 : 0
-  source = "./modules/cloud-sql-postgres"
+resource "google_monitoring_alert_policy" "gke_node_cpu_high" {
+  count = local.enable_monitoring_email ? 1 : 0
 
-  project_id    = var.project_id
-  region        = var.region
-  network_id    = module.vpc.network_id
-  database_name = var.cloud_sql_database_name
-  user_name     = var.cloud_sql_user_name
-  labels        = var.labels
+  project      = var.project_id
+  display_name = "HomeOffice GKE node CPU high"
+  combiner     = "OR"
+  enabled      = true
 
-  depends_on = [module.apis, module.vpc]
+  notification_channels = [google_monitoring_notification_channel.email[0].name]
+
+  conditions {
+    display_name = "Node CPU utilization above 80 percent"
+
+    condition_threshold {
+      filter          = "resource.type=\"k8s_node\" AND metric.type=\"kubernetes.io/node/cpu/allocatable_utilization\" AND resource.labels.cluster_name=\"${google_container_cluster.primary.name}\""
+      duration        = "300s"
+      comparison      = "COMPARISON_GT"
+      threshold_value = 0.8
+
+      aggregations {
+        alignment_period   = "60s"
+        per_series_aligner = "ALIGN_MEAN"
+      }
+    }
+  }
+
+  documentation {
+    content   = "GKE node CPU has been above 80 percent for 5 minutes."
+    mime_type = "text/markdown"
+  }
+
+  depends_on = [google_container_cluster.primary]
 }

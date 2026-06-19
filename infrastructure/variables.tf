@@ -1,48 +1,12 @@
 variable "project_id" {
-  description = "GCP project ID."
+  description = "Qwiklabs GCP project ID. Change this for every new lab."
   type        = string
 }
 
 variable "region" {
-  description = "GCP region for regional resources."
+  description = "Region allowed by the Qwiklabs org policy. For this lab family use europe-west3."
   type        = string
-  default     = "us-central1"
-}
-
-variable "environment" {
-  description = "Environment name used for labels and names."
-  type        = string
-  default     = "dev"
-}
-
-variable "network_name" {
-  description = "VPC network name."
-  type        = string
-  default     = "homeoffice-vpc"
-}
-
-variable "subnet_name" {
-  description = "GKE subnet name."
-  type        = string
-  default     = "homeoffice-subnet"
-}
-
-variable "subnet_cidr" {
-  description = "Primary subnet CIDR range."
-  type        = string
-  default     = "10.10.0.0/20"
-}
-
-variable "pods_cidr" {
-  description = "Secondary CIDR range for GKE pods."
-  type        = string
-  default     = "10.20.0.0/16"
-}
-
-variable "services_cidr" {
-  description = "Secondary CIDR range for GKE services."
-  type        = string
-  default     = "10.30.0.0/20"
+  default     = "europe-west3"
 }
 
 variable "cluster_name" {
@@ -51,95 +15,67 @@ variable "cluster_name" {
   default     = "homeoffice-cluster"
 }
 
-variable "master_ipv4_cidr_block" {
-  description = "CIDR block for the private GKE control plane. Must be /28 and not overlap with VPC ranges."
+variable "network_name" {
+  description = "VPC name."
   type        = string
-  default     = "172.16.0.0/28"
+  default     = "homeoffice-vpc"
 }
 
-variable "master_authorized_cidr_blocks" {
-  description = "CIDR blocks allowed to access the public GKE control plane endpoint. Use your public IP as x.x.x.x/32. Empty is not recommended."
-  type = list(object({
-    cidr_block   = string
-    display_name = string
-  }))
-  default = []
+variable "subnet_name" {
+  description = "Subnet name."
+  type        = string
+  default     = "homeoffice-subnet"
 }
 
-variable "enable_private_endpoint" {
-  description = "If true, the GKE control plane is reachable only from inside the VPC. GitHub-hosted runners cannot deploy directly when true."
-  type        = bool
-  default     = false
+variable "subnet_cidr" {
+  description = "Primary subnet CIDR."
+  type        = string
+  default     = "10.10.0.0/20"
+}
+
+variable "pods_cidr" {
+  description = "Secondary range for GKE pods."
+  type        = string
+  default     = "10.20.0.0/16"
+}
+
+variable "services_cidr" {
+  description = "Secondary range for Kubernetes services."
+  type        = string
+  default     = "10.30.0.0/20"
+}
+
+variable "node_count" {
+  description = "Number of GKE nodes. Keep 1 for speed; set 2 only if needed."
+  type        = number
+  default     = 1
+
+  validation {
+    condition     = var.node_count >= 1 && var.node_count <= 2
+    error_message = "node_count must be 1 or 2 for the one-hour Qwiklabs lab."
+  }
 }
 
 variable "node_machine_type" {
-  description = "GKE node machine type."
+  description = "Machine type for GKE nodes. e2-medium is a good balance for the lab."
   type        = string
   default     = "e2-medium"
 }
 
 variable "node_disk_size_gb" {
-  description = "GKE node disk size in GB."
+  description = "Boot disk size for each GKE node."
   type        = number
-  default     = 50
-}
-
-variable "node_min_count" {
-  description = "Minimum number of nodes per region."
-  type        = number
-  default     = 1
-}
-
-variable "node_max_count" {
-  description = "Maximum number of nodes per region."
-  type        = number
-  default     = 3
-}
-
-variable "artifact_repo_name" {
-  description = "Artifact Registry Docker repository name."
-  type        = string
-  default     = "homeoffice-repo"
-}
-
-variable "github_owner" {
-  description = "GitHub organization or username for Workload Identity Federation."
-  type        = string
-  default     = ""
-}
-
-variable "github_repo" {
-  description = "GitHub repository name for Workload Identity Federation."
-  type        = string
-  default     = ""
+  default     = 30
 }
 
 variable "alert_email" {
-  description = "Email address for Cloud Monitoring notification channel. Leave empty to disable."
+  description = "Email address for Google Cloud Monitoring notifications. Leave empty to disable email channel and alert policy."
   type        = string
-  default     = ""
-}
-
-variable "enable_cloud_sql" {
-  description = "Create a private Cloud SQL PostgreSQL instance. Disabled by default because the current app uses Kubernetes PostgreSQL."
-  type        = bool
-  default     = false
-}
-
-variable "cloud_sql_database_name" {
-  description = "Cloud SQL database name."
-  type        = string
-  default     = "homeoffice"
-}
-
-variable "cloud_sql_user_name" {
-  description = "Cloud SQL database user name."
-  type        = string
-  default     = "homeoffice_user"
+  default     = "ahmad.fawzzi@gmail.com"
 }
 
 variable "labels" {
-  description = "Common labels applied to supported resources."
+  description = "Common labels."
   type        = map(string)
   default = {
     app       = "homeoffice"
