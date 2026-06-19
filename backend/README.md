@@ -1,6 +1,6 @@
 # Backend – HomeOffice Hub
 
-RESTful API built with **Flask**, **SQLAlchemy**, and **PostgreSQL** for the HomeOffice Hub e-commerce platform.
+RESTful API built with **Flask**, **SQLAlchemy**, and **PostgreSQL** for the HomeOffice Hub e-commerce platform..
 
 ---
 
